@@ -1,37 +1,41 @@
 <div class="container">
+  <h5 class="center-align">Pregunta {{ preguntaActualIndex + 1 }} de {{ preguntas.length }}</h5>     
   <div class="card">
     <div class="card-content">
-      <span class="card-title">{{ preguntaActual.texto }}</span>
+      <div *ngIf="preguntaActual">
+        <span class="card-title">{{ preguntaActual.texto }}</span>
+  <ul>
+    <li *ngFor="let opcion of preguntaActual.opciones"
+        (click)="seleccionarOpcion(opcion)"
+        [style.cursor]="'pointer'"
+        [style.background]="
+          (!preguntaActual.multiple && opcion === seleccionUnica) ||
+          (preguntaActual.multiple && seleccionMultiple.has(opcion))
+            ? '#d3f9d8'
+            : 'white'
+        ">
+      <input
+        type="{{ preguntaActual.multiple ? 'checkbox' : 'radio' }}"
+        [checked]="
+          !preguntaActual.multiple
+            ? opcion === seleccionUnica
+            : seleccionMultiple.has(opcion)
+        "
+        readonly
+      />
+      {{ opcion.texto }}
+    </li>
+  </ul>
 
-      <ul class="collection">
-        <li
-          class="collection-item"
-          *ngFor="let opcion of preguntaActual.opciones"
-        >
-          <label>
-            <input
-              [type]="preguntaActual.multiple ? 'checkbox' : 'radio'"
-              class="filled-in"
-              [name]="'preguntaActual'"
-              [value]="opcion.key"
-              [checked]="isChecked(opcion.key)"
-              (change)="seleccionar(opcion.key, $event)"
-            />
-            <span>{{ opcion.key | uppercase }}. {{ opcion.value }}</span>
-          </label>
-        </li>
-      </ul>
-
-      <div *ngIf="respuestas[indiceActual]" class="card-panel light-blue lighten-5">
-        Respuesta actual: <strong>{{ obtenerRespuestaActual() }}</strong>
-      </div>
-
-      <div class="right-align" style="margin-top: 10px;">
-        <button class="btn waves-effect waves-light" (click)="siguiente()">
-          Siguiente
-          <i class="material-icons right">arrow_forward</i>
-        </button>
-      </div>
-    </div>
+  <div *ngIf="esRespuestaCorrecta" class="feedback-correcto">
+    <strong>¡Correcto!:</strong>
+    <div style="white-space: pre-line;">{{ feedbackCorrecto }}</div>
   </div>
+
+  <button (click)="siguientePregunta()" [disabled]="!esRespuestaCorrecta">
+    Siguiente
+  </button>
+</div>
+    </div>
+  </div>  
 </div>

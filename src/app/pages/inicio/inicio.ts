@@ -10,74 +10,81 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./inicio.css']
 })
 export class Inicio {
-   preguntas = [
+ preguntas = [
   {
-    texto: '¿Cuál es tu color favorito?',
+    texto: "1. Cuando en un proceso de contratación se establece que el postor debe formular su oferta proponiendo un monto fijo integral por toda la actividad necesaria para el cumplimiento contractual, y las cantidades, magnitudes y calidades de la prestación están completamente definidas en el requerimiento, ¿a qué modalidad de pago se refiere esta condición según el Reglamento de la Ley General de Contrataciones Públicas?",
     multiple: false,
     opciones: [
-      { key: 'a', value: 'Rojo' },
-      { key: 'b', value: 'Azul' },
-      { key: 'c', value: 'Verde' },
-      { key: 'd', value: 'Amarillo' }
+      { texto: "A. Precios Unitarios.", correcta: false, feedback: "Madrid es la capital de España." },
+      { texto: "B. Tarifas.", correcta: false, feedback: "París es la capital de Francia." },
+      { texto: "C. Esquema Mixto.", correcta: false, feedback: "Berlín es la capital de Alemania." },
+      { texto: "D. Suma Alzada.", correcta: true, feedback: "Explicación:El Anexo I “Definiciones” del Reglamento, en su numeral 85, define “Suma alzada” como la “modalidad de pago aplicable cuando las cantidades, magnitudes y calidades de la prestación están definidos en el requerimiento. El postor formula su oferta proponiendo un monto fijo integral por toda actividad que sea necesaria para el cumplimiento contractual y presenta su presupuesto desagregado en costo y plazo de ejecución.”La modalidad de Suma Alzada se utiliza cuando existe certeza sobre el alcance total de la prestación. El proveedor oferta un precio global por el íntegro de lo requerido, asumiendo el riesgo de cualquier variación en las cantidades si estas estaban definidas." }
     ]
   },
   {
-    texto: 'Selecciona tus lenguajes favoritos',
+    texto: "¿Cuáles de los siguientes son lenguajes de programación?",
     multiple: true,
     opciones: [
-      { key: 'a', value: 'JavaScript' },
-      { key: 'b', value: 'Python' },
-      { key: 'c', value: 'C#' },
-      { key: 'd', value: 'Rust' }
+      { texto: "Python", correcta: true, feedback: "Python es un lenguaje de programación." },
+      { texto: "HTML", correcta: false, feedback: "HTML es un lenguaje de marcado, no de programación." },
+      { texto: "Java", correcta: true, feedback: "Java es un lenguaje de programación." }
     ]
   }
 ];
-
-indiceActual = 0;
-  respuestas: any[] = [];
+  preguntaActualIndex = 0;
+  seleccionUnica: any = null;
+  seleccionMultiple: Set<any> = new Set();
 
   get preguntaActual() {
-    return this.preguntas[this.indiceActual];
+    return this.preguntas[this.preguntaActualIndex];
   }
 
- isChecked(key: string): boolean {
-    const r = this.respuestas[this.indiceActual];
-    return Array.isArray(r) ? r.includes(key) : r === key;
-  }
-
- seleccionar(key: string, evento: Event): void {
-    const multiple = this.preguntaActual.multiple;
-
-    if (multiple) {
-      if (!Array.isArray(this.respuestas[this.indiceActual])) {
-        this.respuestas[this.indiceActual] = [];
-      }
-
-      const checked = (evento.target as HTMLInputElement).checked;
-      if (checked) {
-        this.respuestas[this.indiceActual].push(key);
+  seleccionarOpcion(opcion: any) {
+    if (this.preguntaActual.multiple) {
+      if (this.seleccionMultiple.has(opcion)) {
+        this.seleccionMultiple.delete(opcion);
       } else {
-        this.respuestas[this.indiceActual] = this.respuestas[this.indiceActual].filter((k: string) => k !== key);
+        this.seleccionMultiple.add(opcion);
       }
     } else {
-      this.respuestas[this.indiceActual] = key;
+      this.seleccionUnica = opcion;
     }
   }
 
-
-obtenerRespuestaActual(): string {
-    const respuesta = this.respuestas[this.indiceActual];
-    return Array.isArray(respuesta)
-      ? respuesta.map((r: string) => r.toUpperCase()).join(', ')
-      : respuesta?.toUpperCase() ?? '';
+  get respuestasCorrectas(): any[] {
+    return this.preguntaActual.opciones.filter(op => op.correcta);
   }
 
-siguiente(): void {
-    if (this.indiceActual + 1 < this.preguntas.length) {
-      this.indiceActual++;
+  get esRespuestaCorrecta(): boolean {
+    if (this.preguntaActual.multiple) {
+      const seleccionadas = Array.from(this.seleccionMultiple);
+      return (
+        seleccionadas.length === this.respuestasCorrectas.length &&
+        seleccionadas.every(sel => sel.correcta)
+      );
     } else {
-      alert('¡Cuestionario finalizado!');
-      console.log('Respuestas:', this.respuestas);
+      return this.seleccionUnica?.correcta;
+    }
+  }
+
+  get feedbackCorrecto(): string {
+    if (this.preguntaActual.multiple) {
+      return Array.from(this.seleccionMultiple)
+        .filter(op => op.correcta)
+        .map(op => op.feedback)
+        .join('\n');
+    } else {
+      return this.seleccionUnica?.feedback ?? '';
+    }
+  }
+
+  siguientePregunta() {
+    this.seleccionUnica = null;
+    this.seleccionMultiple.clear();
+    if (this.preguntaActualIndex < this.preguntas.length - 1) {
+      this.preguntaActualIndex++;
+    } else {
+      alert("¡Has completado todas las preguntas!");
     }
   }
 }

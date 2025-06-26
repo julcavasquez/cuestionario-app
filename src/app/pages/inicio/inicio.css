@@ -1,9 +1,17 @@
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
+li {
   padding: 8px;
   border: 1px solid #ccc;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+li:hover {
+  background-color: #f0f0f0;
+}
+
+.feedback-correcto {
+  margin-top: 10px;
+  background-color: #e1f5fe;
+  padding: 10px;
+  border-radius: 5px;
 }
